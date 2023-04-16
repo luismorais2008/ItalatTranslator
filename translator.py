@@ -269,4 +269,4 @@ def silabas(word): #fazer a divisão silábica da palavra
     silabas = silabas[0:silabas.index("* Quantas")].replace("\n", "").replace(" **", "").replace("** ", "").replace(" ", "").split("-")
     return silabas
   
-oracao_portuguese_to_italat('Eu sou o Guilherme')
+oracao_portuguese_to_italat('Eu sou o Luís')
