@@ -29,8 +29,8 @@ palavras_irregulares = dict({
         "dia" : "diem", 
         "dias" : "diem",
         "camas" : "beche",
-        "o" : {"determinante":"il", "pronome" : "lo"}, 
-        "os" : "li", 
+        "o" : {"determinante":"li", "pronome" : "lo"}, 
+        "os" : "il", 
         "a" : "la", 
         "as" : "le",
         "um" : "uno", 
@@ -124,7 +124,8 @@ palavras_irregulares = dict({
         "bom" : "buon", 
         "boa": "buonna", 
         "bons" : "boni", 
-        "boas" : "bone"
+        "boas" : "bone", 
+        "e" : "et"
     })
 
 class Palavra(Enum): 
@@ -137,14 +138,18 @@ class Palavra(Enum):
 def texto_portuguese_to_italat(text): #dividir o texto em orações
     s = text.split()
     c = []
-    final = ""
+    translation = ""
     for i in range(len(s)): 
         if "conjun\\xc3\\xa7\\xc3\\xa3o" in priberam_search(s[i]):
             c.append(i)
-            final.append("oracao" + s[i] + " ")
-    for i in range(len(c)-1): 
-        final = final.replace("oracao", oracao_portuguese_to_italat(text[text.index(s[c[i]]):text.index(s[c[i+1]]+len(s[c[i+1]]))]), 1)
-    return final 
+    try: 
+        translation += oracao_portuguese_to_italat(' '.join(s[0:c[0]])) + " "
+        for i in range(len(c)-1):
+            translation += word_portuguese_to_italat(s[c[i]]) + " " + oracao_portuguese_to_italat(' '.join(s[c[i]+1:c[i+1]])) + " "
+        translation += word_portuguese_to_italat(word_data(s[c[len(c)-1]])) + " " + oracao_portuguese_to_italat(' '.join(s[c[len(c)-1]+1:len(s)]))
+    except: 
+        translation = oracao_portuguese_to_italat(' '.join(s[0:len(s)-1])) 
+    return translation
 
 
 def oracao_portuguese_to_italat(text): #organizar a sintaxe da oração e dividir a oração em palavras
@@ -167,10 +172,13 @@ def oracao_portuguese_to_italat(text): #organizar a sintaxe da oração e dividi
     r = ""
     for p in range(len(palavras)):
         if palavras[p] == 'o': 
-            if p == 0 or 'nome' in priberam_search(palavras[p+1]): 
-                r += 'li'
-            else: 
-                r += 'lo '
+            try:
+              if p == 0 and 'nome' in priberam_search(palavras[p+1]): 
+                  r += 'li'
+              else: 
+                  r += 'lo '
+            except: 
+                continue 
         elif palavras[p] =='se':
                 d = palavras_irregulares["se"]
                 d1 = word_data(palavras[p-1])
@@ -269,4 +277,4 @@ def silabas(word): #fazer a divisão silábica da palavra
     silabas = silabas[0:silabas.index("* Quantas")].replace("\n", "").replace(" **", "").replace("** ", "").replace(" ", "").split("-")
     return silabas
   
-oracao_portuguese_to_italat('Eu sou o Luís')
+texto_portuguese_to_italat('Eu sou o Luis e tu és a Carina')
