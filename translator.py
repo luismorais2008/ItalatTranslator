@@ -142,13 +142,13 @@ def texto_portuguese_to_italat(text):
     p = []
     translation = ""
     for i in range(len(s)): 
-        if s[i][len(s[i]-1)] in sinal_de_pontuacao:
+        if s[i][len(s[i])-1] in sinal_de_pontuacao:
             p.append(i)
     try: 
         translation += frase_portuguese_to_italat(' '.join(s[0:p[0]])) + " "
         for i in range(len(p)-1):
-            translation += s[p[i]] + " " + oracao_portuguese_to_italat(' '.join(s[p[i]+1:p[i+1]])) + " "
-        translation += word_portuguese_to_italat(word_data(s[p[len(p)-1]])) + " " + oracao_portuguese_to_italat(' '.join(s[p[len(p)-1]+1:len(s)]))
+            translation += s[p[i]] + " " + frase_portuguese_to_italat(' '.join(s[p[i]+1:p[i+1]])) + " "
+        translation += word_portuguese_to_italat(word_data(s[p[len(p)-1]])) + " " + frase_portuguese_to_italat(' '.join(s[p[len(p)-1]+1:len(s)]))
     except: 
         translation = oracao_portuguese_to_italat(' '.join(s[0:len(s)-1])) 
     return translation
@@ -227,9 +227,11 @@ def word_portuguese_to_italat(palavra): #traduzir a palavra
         else: 
             traducao+="cus"
     elif palavra["classe"] is Palavra.ADVERBIO: 
-        if "z" == palavra["silabas"][len(palavra["silabas"])-3]: 
-            palavra["silabas"][len("silabas") - 3] = palavra["silabas"][len("silabas") - 3].replace("z", "")
-        for i in palavra["silabas"][0:len(palavra["silabas"]-2)]: 
+        l = palavra["silabas"][len(palavra["silabas"])-3]
+        if "z" == l[len(l)-1]: 
+            print("yes...")
+            palavra["silabas"][len(palavra["silabas"])-3] = l.replace("z", "")
+        for i in palavra["silabas"][0:len(palavra["silabas"])-2]: 
             traducao+=i
         traducao += "mice"
     elif palavra["classe"] is Palavra.LOGIA: 
@@ -297,4 +299,11 @@ def silabas(word): #fazer a divisão silábica da palavra
     silabas = silabas[0:silabas.index("* Quantas")].replace("\n", "").replace(" **", "").replace("** ", "").replace(" ", "").split("-")
     return silabas
   
-texto_portuguese_to_italat('Eu sou o Luis e tu és a Carina')
+q = []
+while True: 
+    i = input("What do you want me to translate?")
+    print(texto_portuguese_to_italat(i))
+    q.append(int(input("How would you evaluate this translation within 100 stars?")))
+    print("Sorry. This is my average error: " + str(100 - np.mean(q)) + "%")
+    
+
