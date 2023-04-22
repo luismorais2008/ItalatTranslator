@@ -12,13 +12,163 @@ from statistics import mean
 from math import ceil 
 import numpy as np 
 
+def translate(request):
+    return HttpResponse("""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&display=swap');
+
+body{
+    background-color: #000;
+    color:white;
+    font-family: 'Bruno Ace SC', cursive;
+}
+
+article{
+    margin-top: 100px;
+    margin: 100px;
+    margin-bottom: 200px; 
+}
+
+div .input{
+    float: left; 
+    background-color: white;
+}
+
+.board{
+    border: 0ch;
+    color:black;
+    width: 450px; 
+    height: 200px;
+    border-radius: 10px;
+}
+
+footer{
+    margin-top: 40%; 
+    text-align: center;
+}
+
+div .output{
+    float: right; 
+    background-color: white;
+}
+
+h1{
+    overflow: hidden; 
+    border-right: .15em solid white; 
+    white-space: nowrap; 
+    text-align:center;
+    width: 60%;
+    margin: 0 auto; 
+    animation: 
+      typing 3.5s steps(40, end),
+      blink-caret .75s step-end infinite;
+}
+
+.translation{
+    margin-top: 10%;
+}
+  
+  @keyframes typing {
+    from { width: 0 }
+    to { width: 60% } 
+  }
+  
+  @keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: white; }
+  }
+
+.main{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    height: 1px;
+    width: 1px;
+    background-color: #fff;
+    border-radius: 50%;
+    box-shadow: -24vw -44vh 2px 2px #fff,38vw -4vh 0px 0px #fff,-20vw -48vh 1px 2px #fff,-39vw 38vh 3px 1px #fff,-42vw -11vh 0px 3px #fff,12vw 15vh 3px 3px #fff,42vw 6vh 3px 2px #fff,-8vw 9vh 0px 2px #fff,34vw -38vh 1px 0px #fff,-17vw 45vh 3px 1px #fff,22vw -36vh 3px 2px #fff,-42vw 1vh 1px 0px #fff;
+    animation: zoom 10s alternate infinite;
+}
+
+@keyframes zoom {
+    0%{
+        transform: scale(1);
+    }
+    100%{
+        transform: scale(1.5);
+    }
+}
+    </style>
+    <title>Tradutor de Italat</title>
+</head>
+<body>
+    <div class="translation">
+    <h1>Tradutor de português para italat</h1>
+    <article>
+        <div class="input board" style="padding: 40px">
+            <textarea onclick="audio()" class="board"></textarea>
+        </div>
+        <div class="output board" style="padding: 40px ">
+            <p style="padding-right: 40px; font-size: auto; text-align: justify;" class="board"></p>
+        </div>
+    </article>
+    </div>
+    <div class="main">
+    </div>
+    <script type="text/javascript">
+        function randomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+const STAR_COUNT = 200
+let result = ""
+
+for(let i = 0; i < STAR_COUNT; i++){
+    result += `${randomNumber(-50, 50)}vw ${randomNumber(-50, 50)}vh ${randomNumber(0, 3)}px ${randomNumber(0, 3)}px #fff,`
+}
+
+console.log(result.substring(0, result.length - 1))
+
+function audio(){
+    const audio = new Audio('universal.mp3');
+    audio.play();
+}
+
+async function get_translation(text) {
+    const response = await fetch('http://127.0.0.1:8000/?text=' + String(text));
+    // waits until the request completes...
+    txt = String(await response.text())
+    console.log(txt)
+    const paragraph = document.getElementsByTagName("p")[0]
+    paragraph.innerText = txt
+}
+
+document.addEventListener('keyup', (event) => {
+    if(String(event.key) === "Enter"){
+    const textArea = document.getElementsByTagName("textarea")[0]
+    get_translation(textArea.value)
+    }
+  }, false);
+
+    </script>
+    <footer>
+        &copy; Luís Morais e Carina Sousa 2023
+    </footer>
+</body>
+</html>""")
+
 def index(request):
     if(request.method == "GET"): 
         try: 
             return HttpResponse(texto_portuguese_to_italat(fix_text(str(request.GET['text']))))
         except Exception:  
             pass 
-    return HttpResponse("Sorry, something went wrong. Try agarin in a few ages.")
+    return HttpResponse("<h1>Sorry, something went wrong. Try agarin in a few ages.</h1>")
 
 palavras_irregulares = dict({
         "água" : "acqua",
