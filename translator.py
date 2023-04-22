@@ -135,7 +135,25 @@ class Palavra(Enum):
     ADVERBIO = 2, 
     LOGIA = 3 
 
-def texto_portuguese_to_italat(text): #dividir o texto em orações
+sinal_de_pontuacao = [",", "...", "!", "?", "\"", "'", "(", ")", ";"]
+
+def texto_portuguese_to_italat(text): 
+    s = text.split()
+    p = []
+    translation = ""
+    for i in range(len(s)): 
+        if s[i][len(s[i]-1)] in sinal_de_pontuacao:
+            p.append(i)
+    try: 
+        translation += frase_portuguese_to_italat(' '.join(s[0:p[0]])) + " "
+        for i in range(len(p)-1):
+            translation += s[p[i]] + " " + oracao_portuguese_to_italat(' '.join(s[p[i]+1:p[i+1]])) + " "
+        translation += word_portuguese_to_italat(word_data(s[p[len(p)-1]])) + " " + oracao_portuguese_to_italat(' '.join(s[p[len(p)-1]+1:len(s)]))
+    except: 
+        translation = oracao_portuguese_to_italat(' '.join(s[0:len(s)-1])) 
+    return translation
+
+def frase_portuguese_to_italat(text): #dividir o texto em orações
     s = text.split()
     c = []
     translation = ""
@@ -209,6 +227,8 @@ def word_portuguese_to_italat(palavra): #traduzir a palavra
         else: 
             traducao+="cus"
     elif palavra["classe"] is Palavra.ADVERBIO: 
+        if "z" == palavra["silabas"][len(palavra["silabas"])-3]: 
+            palavra["silabas"][len("silabas") - 3] = palavra["silabas"][len("silabas") - 3].replace("z", "")
         for i in palavra["silabas"][0:len(palavra["silabas"]-2)]: 
             traducao+=i
         traducao += "mice"
