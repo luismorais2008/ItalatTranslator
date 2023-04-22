@@ -103,11 +103,15 @@ palavras_irregulares = dict({
         "para" : "al",
         "ao" : "al", 
         "à" : "ai", 
+        "aprender" : "discete",
+        "ensinar" : "docere",
         "aos" : "aux", 
         "às" : "aux", 
         "no" : "nel", 
         "na" : "nel", 
         "num" : "nun",
+        "nada" : "rien",
+        "pensar" : "cogitare",
         "numa" : "nun",
         "estar" : "tar", 
         "sendo" : "sí", 
@@ -137,28 +141,12 @@ class Palavra(Enum):
 
 sinal_de_pontuacao = [",", "...", "!", "?", "\"", "'", "(", ")", ";"]
 
-def texto_portuguese_to_italat(text): 
-    s = text.split()
-    p = []
-    translation = ""
-    for i in range(len(s)): 
-        if s[i][len(s[i])-1] in sinal_de_pontuacao:
-            p.append(i)
-    try: 
-        translation += frase_portuguese_to_italat(' '.join(s[0:p[0]])) + " "
-        for i in range(len(p)-1):
-            translation += s[p[i]] + " " + frase_portuguese_to_italat(' '.join(s[p[i]+1:p[i+1]])) + " "
-        translation += word_portuguese_to_italat(word_data(s[p[len(p)-1]])) + " " + frase_portuguese_to_italat(' '.join(s[p[len(p)-1]+1:len(s)]))
-    except: 
-        translation = oracao_portuguese_to_italat(' '.join(s[0:len(s)-1])) 
-    return translation
-
-def frase_portuguese_to_italat(text): #dividir o texto em orações
+def texto_portuguese_to_italat(text): #dividir o texto em orações
     s = text.split()
     c = []
     translation = ""
     for i in range(len(s)): 
-        if "conjun\\xc3\\xa7\\xc3\\xa3o" in priberam_search(s[i]):
+        if "conjun\\xc3\\xa7\\xc3\\xa3o" in priberam_search(s[i]) or s[i] in sinal_de_pontuacao:
             c.append(i)
     try: 
         translation += oracao_portuguese_to_italat(' '.join(s[0:c[0]])) + " "
@@ -213,6 +201,11 @@ def oracao_portuguese_to_italat(text): #organizar a sintaxe da oração e dividi
 
 def word_portuguese_to_italat(palavra): #traduzir a palavra
     traducao = ""
+    try: 
+        if palavra["infinitivo"] in palavras_irregulares.keys():
+            return palavras_irregulares[palavra["infinitivo"]]
+    except KeyError: 
+        pass 
     if palavra["origem"] in palavras_irregulares.keys(): 
         return palavras_irregulares[palavra["origem"]]
     elif palavra["classe"] is Palavra.NORMAL and len(palavra["silabas"])>1:
@@ -301,9 +294,12 @@ def silabas(word): #fazer a divisão silábica da palavra
   
 q = []
 while True: 
-    i = input("What do you want me to translate?")
-    print(texto_portuguese_to_italat(i))
-    q.append(int(input("How would you evaluate this translation within 100 stars?")))
-    print("Sorry. This is my average error: " + str(100 - np.mean(q)) + "%")
+    try: 
+        i = input("What do you want me to translate?")
+        print(texto_portuguese_to_italat(i))
+        q.append(int(input("How would you rate this translation within 100 stars?")))
+        print("Sorry. This is my average error: " + str(100 - np.mean(q)) + "%")
+    except ValueError: 
+        print("Please, write something for me to translate! I strive for it!")
     
 
