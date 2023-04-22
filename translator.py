@@ -269,7 +269,7 @@ def word_data(word): #recolher informação sobre uma palavra
         b = priberam.index("]")
         b = ceil((a+b)/2)
         palavra["infinitivo"] = priberam[a:b]
-    if "adv\\xc3\\xa9rbio" in priberam: 
+    if "adv\\xc3\\xa9rbio" in priberam and "mente" in palavra["origem"]: 
         palavra["classe"] = Palavra.ADVERBIO 
     if "logia" in palavra["origem"]:
         palavra["classe"] = Palavra.LOGIA
