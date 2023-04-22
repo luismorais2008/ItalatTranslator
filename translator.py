@@ -122,6 +122,7 @@ palavras_irregulares = dict({
         "que" : "qui", 
         "como" : "come", 
         "quando" : "cum", 
+        "saber" : "sapere",
         "onde" : "ubi", 
         "quem" : "chi", 
         "quanto" : "quanti", 
@@ -139,15 +140,18 @@ class Palavra(Enum):
     ADVERBIO = 2, 
     LOGIA = 3 
 
-sinal_de_pontuacao = [",", "...", "!", "?", "\"", "'", "(", ")", ";"]
+sinal_de_pontuacao = [",", "...", "!", "?", "\"", "'", "(", ")", ";", ".", ":"]
 
 def texto_portuguese_to_italat(text): #dividir o texto em orações
+    for sp in sinal_de_pontuacao:
+        if sp in text:
+            text = text.replace(sp, " " + sp)
     s = text.split()
     c = []
     translation = ""
     for i in range(len(s)): 
         if "conjun\\xc3\\xa7\\xc3\\xa3o" in priberam_search(s[i]) or s[i] in sinal_de_pontuacao:
-            c.append(i)
+                c.append(i)
     try: 
         translation += oracao_portuguese_to_italat(' '.join(s[0:c[0]])) + " "
         for i in range(len(c)-1):
@@ -160,14 +164,23 @@ def texto_portuguese_to_italat(text): #dividir o texto em orações
 
 def oracao_portuguese_to_italat(text): #organizar a sintaxe da oração e dividir a oração em palavras
     text = text.replace("-", "")
-    palavras = list([])
+    print(text)
+    palavras = []
+    verb = False 
     for p in text.split(): 
         data = word_data(p)
         translation = word_portuguese_to_italat(data)
-        if len(palavras) > 0 and data['classe'] == Palavra.VERBO: 
-            if palavras[len(palavras) - 1].lower() == "nó": 
-                palavras[len(palavras) - 1] = "non"
-            palavras = np.concatenate(([word_portuguese_to_italat(data)], palavras), axis = None)
+        if len(palavras) > 0 and data['classe'] == Palavra.VERBO and not verb: 
+            verb = not verb 
+            ar = [word_portuguese_to_italat(data)]
+            if palavras[len(palavras) - 1].lower() == "nó":
+                palavras = np.delete(palavras, [len(palavras) - 1])
+                ar.append( "non")
+            elif  palavras[len(palavras)-2].lower() == "nó": 
+                palavras = np.delete(palavras, [len(palavras) - 2])
+                ar.append("non")
+                ar.append(palavras(len(palavras)-1))
+            palavras = np.concatenate((ar, palavras), axis = None)
         elif p.lower() in palavras_irregulares.keys(): 
             if type(palavras_irregulares[p.lower()]) == dict: 
                 palavras = np.append(palavras, p.lower())
@@ -195,7 +208,6 @@ def oracao_portuguese_to_italat(text): #organizar a sintaxe da oração e dividi
                 r += opt[ceil(mean([d1['número'], d2['número']]))][ceil(mean(d1['género'], d2['género']))] + " "
         else: 
             r += palavras[p] + " "
-
     r = r[0:len(r) - 1] 
     return r 
 
@@ -234,15 +246,14 @@ def word_portuguese_to_italat(palavra): #traduzir a palavra
     elif palavra["classe"] is Palavra.VERBO: 
          if len(palavra["silabas"])>1:
               s = silabas(palavra["infinitivo"])
-              conjugacao = s[len(s) - 1] 
               for i in s[0:len(s)-1]: 
                     traducao += i 
               for c in ['ar', 'er', 'ir', 'or']: 
-                    terminacao = "cusi" 
-                    if c == 'ir': 
-                        terminacao = 'cus'
-                    if c in conjugacao:
-                        traducao += conjugacao.replace('ir', '') + terminacao         
+                    terminacao = "cus" 
+                    if c != 'ir': 
+                        terminacao =  "re"
+                    if c in s[len(s)-1]:
+                        traducao += terminacao         
          else:
               traducao = palavra["infinitivo"]
     else: 
@@ -261,6 +272,7 @@ def word_data(word): #recolher informação sobre uma palavra
         a = priberam.index("[")+1
         b = priberam.index("]")
         b = ceil((a+b)/2)
+        print(priberam)
         palavra["infinitivo"] = priberam[a:b]
     if "adv\\xc3\\xa9rbio" in priberam and "mente" in palavra["origem"]: 
         palavra["classe"] = Palavra.ADVERBIO 
@@ -276,10 +288,13 @@ def word_data(word): #recolher informação sobre uma palavra
     return palavra
 
 def priberam_search(word): #pesquisar a palavra no priberam e recolher toda a informação disponível
-    link = "https://dicionario.priberam.org/{word}".format(word = word)
-    data = str(requests.get(link).content)
-    data = data[data.index("<div id=\"resultados\""):data.index('</article')] 
-    priberam = html.escape(str(html2text.html2text(data)).replace("\\n", "").replace("#", "").replace("\\r", ""))
+    try: 
+        link = "https://dicionario.priberam.org/{word}".format(word = word)
+        data = str(requests.get(link).content)
+        data = data[data.index("<div id=\"resultados\""):data.index('</article')] 
+        priberam = html.escape(str(html2text.html2text(data)).replace("\\n", "").replace("#", "").replace("\\r", ""))
+    except ValueError: 
+        return "not found"
     return priberam
 
 def silabas(word): #fazer a divisão silábica da palavra
