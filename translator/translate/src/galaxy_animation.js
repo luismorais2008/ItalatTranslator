@@ -15,3 +15,19 @@ function audio(){
     const audio = new Audio('universal.mp3');
     audio.play();
 }
+
+async function get_translation(text) {
+    const response = await fetch('http://127.0.0.1:8000/?text=' + String(text));
+    // waits until the request completes...
+    txt = String(await response.text())
+    console.log(txt)
+    const paragraph = document.getElementsByTagName("p")[0]
+    paragraph.innerText = txt
+}
+
+document.addEventListener('keyup', (event) => {
+    if(String(event.key) === "Enter"){
+    const textArea = document.getElementsByTagName("textarea")[0]
+    get_translation(textArea.value)
+    }
+  }, false);

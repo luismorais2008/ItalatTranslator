@@ -5,6 +5,7 @@ import sys
 from enum import Enum
 import requests 
 import html2text
+from ftfy import fix_text
 from unidecode import unidecode
 import html
 from statistics import mean
@@ -14,10 +15,10 @@ import numpy as np
 def index(request):
     if(request.method == "GET"): 
         try: 
-            return HttpResponse(texto_portuguese_to_italat(str(request.body)))
-        except Exception: 
+            return HttpResponse(texto_portuguese_to_italat(fix_text(str(request.GET['text']))))
+        except Exception:  
             pass 
-    return HttpResponse("Sorry, something went wrong. Try again in a few ages.")
+    return HttpResponse("Sorry, something went wrong. Try agarin in a few ages.")
 
 palavras_irregulares = dict({
         "água" : "acqua",
@@ -176,7 +177,6 @@ def texto_portuguese_to_italat(text): #dividir o texto em orações
 
 def oracao_portuguese_to_italat(text): #organizar a sintaxe da oração e dividir a oração em palavras
     text = text.replace("-", "")
-    print(text)
     palavras = []
     verb = False 
     for p in text.split(): 
@@ -246,7 +246,6 @@ def word_portuguese_to_italat(palavra): #traduzir a palavra
     elif palavra["classe"] is Palavra.ADVERBIO: 
         l = palavra["silabas"][len(palavra["silabas"])-3]
         if "z" == l[len(l)-1]: 
-            print("yes...")
             palavra["silabas"][len(palavra["silabas"])-3] = l.replace("z", "")
         for i in palavra["silabas"][0:len(palavra["silabas"])-2]: 
             traducao+=i

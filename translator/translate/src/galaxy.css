@@ -19,13 +19,14 @@ div .input{
 
 .board{
     border: 0ch;
-    width: 500px; 
+    color:black;
+    width: 450px; 
     height: 200px;
     border-radius: 10px;
 }
 
 footer{
-    margin-top: 400px; 
+    margin-top: 40%; 
     text-align: center;
 }
 
@@ -47,7 +48,7 @@ h1{
 }
 
 .translation{
-    margin-top: 20%;
+    margin-top: 10%;
 }
   
   @keyframes typing {
