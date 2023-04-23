@@ -140,7 +140,7 @@ function audio(){
 }
 
 async function get_translation(text) {
-    const response = await fetch('http://127.0.0.1:8000/?text=' + String(text));
+    const response = await fetch('http://149.90.143.191/translate?text=' + String(text));
     // waits until the request completes...
     txt = String(await response.text())
     console.log(txt)
